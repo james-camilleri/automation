@@ -1,7 +1,11 @@
 import { Config, Context } from '@netlify/functions'
 
 export default async (request: Request, context: Context) => {
-  console.log(request)
+  const payload = await request.json()
+  console.log('request', request)
+  console.log('payload', payload)
+  console.log('context', context)
+
   return new Response('Called GitHub to Todoist webhook')
 }
 
