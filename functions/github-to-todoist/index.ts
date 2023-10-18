@@ -10,7 +10,7 @@ import {
   IssuesClosedEvent,
 } from '@octokit/webhooks-types'
 
-import { verifySignature } from './validation'
+import { verifyGithubEvent } from './validation'
 
 const GITHUB_USERNAME = 'james-camilleri'
 const VALID_ACTIONS = new Set([
@@ -86,18 +86,17 @@ async function syncGitHubIssue(
 }
 
 export default async (request: Request, context: Context) => {
-  const eventType = request.headers.get('x-github-event')
-  const event = await request.json()
-  const { action } = event
-
   if (!GITHUB_WEBHOOK_SECRET || !TODOIST_API_KEY) {
     return new Response('Webhook configured incorrectly', { status: 500 })
   }
 
-  if (!verifySignature(request, GITHUB_WEBHOOK_SECRET)) {
+  const event = await verifyGithubEvent(request, GITHUB_WEBHOOK_SECRET)
+  if (!event) {
     return new Response('Invalid signature', { status: 401 })
   }
 
+  const eventType = request.headers.get('x-github-event')
+  const { action } = event
   if (eventType !== 'issues' || !VALID_ACTIONS.has(action)) {
     return new Response(`Event "${eventType}.${action}" is not valid for this webhook`, {
       status: 405,
