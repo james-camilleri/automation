@@ -34,13 +34,13 @@ const GITHUB_WEBHOOK_SECRET = process.env.GITHUB_ISSUES_WEBHOOK_SECRET
 const TODOIST_API_KEY = process.env.TODOIST_API_KEY
 
 function urlToMarkdown(url: string) {
-  return `[${url}](${url})`
+  return `[GitHub issue #${url.replace(/.*\/(?=\d+)/, '')}](${url})`
 }
 
 async function getTaskForIssue(issue: Issue, projectId: string, todoist: TodoistApi) {
   const tasks = await todoist.getTasks({ projectId })
   return tasks.filter(
-    (task) => task.content === issue.title && task.description === urlToMarkdown(issue.url),
+    (task) => task.content === issue.title && task.description === urlToMarkdown(issue.html_url),
   )[0]
 }
 
@@ -82,7 +82,7 @@ async function syncGitHubIssue(
   const taskDetails = {
     projectId,
     content: issue.title,
-    description: urlToMarkdown(issue.url),
+    description: urlToMarkdown(issue.html_url),
     labels,
   }
 
