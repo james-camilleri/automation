@@ -30,8 +30,8 @@ const LABEL_WHITELIST = new Set([
   'size: large',
 ])
 
-const GITHUB_WEBHOOK_SECRET = Netlify.env.get('GITHUB_ISSUES_WEBHOOK_SECRET')
-const TODOIST_API_KEY = Netlify.env.get('TODOIST_API_KEY')
+const GITHUB_WEBHOOK_SECRET = process.env.GITHUB_ISSUES_WEBHOOK_SECRET
+const TODOIST_API_KEY = process.env.TODOIST_API_KEY
 
 function urlToMarkdown(url: string) {
   return `[${url}](${url})`
