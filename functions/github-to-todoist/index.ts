@@ -63,13 +63,10 @@ async function syncGitHubIssue(
   }
 
   const task = await getTaskForIssue(event.issue, projectId, todoist)
-  console.debug('Got task for issue', task)
   const isIssueClosed = event.action === 'closed'
-  console.debug('Issue is closed', isIssueClosed)
 
   if (isIssueClosed) {
     if (task) {
-      console.debug('Closing task', task.id)
       await todoist.closeTask(task.id)
     }
 
