@@ -57,6 +57,11 @@ async function syncGitHubIssue(
 ) {
   const { issue } = event
 
+  console.debug('issue.assignees', issue.assignees)
+  console.debug(
+    'issue.assignees.some((assignee) => assignee.login === GITHUB_USERNAME)',
+    issue.assignees.some((assignee) => assignee.login === GITHUB_USERNAME),
+  )
   if (!issue.assignees.some((assignee) => assignee.login === GITHUB_USERNAME)) {
     console.warn(`Issue not assigned to user ${GITHUB_USERNAME} `)
     return
