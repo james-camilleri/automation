@@ -86,7 +86,7 @@ async function syncGitHubIssue(
     labels,
   }
 
-  return task ? await todoist.updateTask(task.id, taskDetails) : await todoist.addTask(taskDetails)
+  return task ? todoist.updateTask(task.id, taskDetails) : todoist.addTask(taskDetails)
 }
 
 export default async (request: Request, context: Context) => {
