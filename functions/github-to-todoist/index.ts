@@ -62,6 +62,10 @@ async function syncGitHubIssue(
     return
   }
 
+  if (event.action !== 'opened' && issue.created_at === issue.updated_at) {
+    console.warn(`Concurrent call for issue #${issue.number}`)
+  }
+
   const task = await getTaskForIssue(event.issue, projectId, todoist)
   const isIssueClosed = event.action === 'closed'
 
