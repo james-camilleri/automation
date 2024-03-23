@@ -102,6 +102,11 @@ export default async (request: Request, context: Context) => {
   }
 
   const eventType = request.headers.get('x-github-event')
+
+  if (eventType === 'ping') {
+    return new Response('Ping received successfully', { status: 200 })
+  }
+
   const { action } = event
   if (eventType !== 'issues' || !VALID_ACTIONS.has(action)) {
     return new Response(`Event "${eventType}.${action}" is not valid for this webhook`, {
