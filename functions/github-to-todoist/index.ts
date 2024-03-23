@@ -102,6 +102,14 @@ export default async (request: Request, context: Context) => {
   }
 
   const eventType = request.headers.get('x-github-event')
+  const todoistProjectId = context.params['projectId']
+  const todoist = new TodoistApi(TODOIST_API_KEY)
+
+  try {
+    await todoist.getProject(todoistProjectId)
+  } catch {
+    return new Response('Todoist project not found', { status: 404 })
+  }
 
   if (eventType === 'ping') {
     return new Response('Ping received successfully', { status: 200 })
@@ -112,15 +120,6 @@ export default async (request: Request, context: Context) => {
     return new Response(`Event "${eventType}.${action}" is not valid for this webhook`, {
       status: 405,
     })
-  }
-
-  const todoistProjectId = context.params['projectId']
-  const todoist = new TodoistApi(TODOIST_API_KEY)
-
-  try {
-    await todoist.getProject(todoistProjectId)
-  } catch {
-    return new Response('Todoist project not found', { status: 404 })
   }
 
   try {
