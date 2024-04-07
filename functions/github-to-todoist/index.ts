@@ -30,6 +30,8 @@ const LABEL_WHITELIST = new Set([
   'size: large',
 ])
 
+const MULTIPLE_CALL_BUFFER_IN_SECONDS = 7
+
 const GITHUB_WEBHOOK_SECRET = process.env.GITHUB_ISSUES_WEBHOOK_SECRET
 const TODOIST_API_KEY = process.env.TODOIST_API_KEY
 
@@ -56,18 +58,19 @@ async function syncGitHubIssue(
   todoist: TodoistApi,
 ) {
   const { issue } = event
-  console.log('🚀 GitHub webhook call')
-  console.log(event.action)
-  console.log('created at:', issue.created_at)
-  console.log('updated at:', issue.updated_at)
-  console.log(JSON.stringify(event, null, 2))
 
   if (!issue.assignees.some((assignee) => assignee.login === GITHUB_USERNAME)) {
     console.warn(`Issue not assigned to user ${GITHUB_USERNAME} `)
     return
   }
 
-  if (event.action !== 'opened' && issue.created_at === issue.updated_at) {
+  const createdAt = new Date(issue.created_at)
+  const updatedAt = new Date(issue.updated_at)
+
+  // Drop multiple calls to the webhook if they occur too close to the
+  // initial issue creation, to avoid duplicate task creation on Todoist.
+  const timeSinceCreation = (updatedAt.getTime() - createdAt.getTime()) / 1000
+  if (event.action !== 'opened' && timeSinceCreation <= MULTIPLE_CALL_BUFFER_IN_SECONDS) {
     console.warn(`Concurrent call for issue #${issue.number}`)
     return
   }
