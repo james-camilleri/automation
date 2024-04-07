@@ -56,6 +56,11 @@ async function syncGitHubIssue(
   todoist: TodoistApi,
 ) {
   const { issue } = event
+  console.log('🚀 GitHub webhook call')
+  console.log(event.action)
+  console.log('created at:', issue.created_at)
+  console.log('updated at:', issue.updated_at)
+  console.log(JSON.stringify(event, null, 2))
 
   if (!issue.assignees.some((assignee) => assignee.login === GITHUB_USERNAME)) {
     console.warn(`Issue not assigned to user ${GITHUB_USERNAME} `)
