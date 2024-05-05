@@ -24,6 +24,8 @@
     "ts-node": "^10.9.1"
   },
   "dependencies": {
-    "@doist/todoist-api-typescript": "^2.2.0"
+    "@doist/todoist-api-typescript": "^2.2.0",
+    "@netlify/blobs": "^7.3.0",
+    "ynab": "^2.2.0"
   }
 }
