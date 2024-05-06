@@ -46,51 +46,65 @@ export default async (request: Request) => {
   const todoist = new TodoistApi(TODOIST_API_KEY)
 
   const payload = (JSON.parse((await request.json()) ?? '') ?? {}) as YnabWebhookPayload
+  console.info('Received payload', payload)
 
   if (!validatePayload(payload)) {
     console.error('Invalid payload', payload)
     return new Response('Invalid payload', { status: 400 })
   }
 
-  await Promise.all(
-    Object.entries(payload).map(async ([budgetId, transactions]) => {
-      const transactionsToProcess = transactions.filter(
-        ({ category_name }) => category_name === OWED_YNAB_CATEGORY_NAME,
-      )
+  try {
+    await Promise.all(
+      Object.entries(payload).map(async ([budgetId, transactions]) => {
+        const transactionsToProcess = transactions.filter(
+          ({ category_name }) => category_name === OWED_YNAB_CATEGORY_NAME,
+        )
+        console.info('Transactions to process', transactionsToProcess)
 
-      if (transactionsToProcess.length === 0) {
-        return
-      }
-
-      const currency =
-        (await ynab.budgets.getBudgetSettingsById(budgetId)).data.settings.currency_format
-          ?.display_symbol ?? ''
-
-      const tasks = transactionsToProcess.map(({ amount, date, memo, payee_name }) => {
-        let task = `(${currency ? `${currency} ` : ''}${formatAmount(amount)}) `
-
-        if (memo) {
-          task += `${memo}, `
+        if (transactionsToProcess.length === 0) {
+          console.info('No transactions to process', transactionsToProcess)
+          return
         }
-        task += payee_name
 
-        return {
-          content: task,
-          description: Intl.DateTimeFormat('en-GB', { dateStyle: 'short' }).format(new Date(date)),
-        }
-      })
+        const currency =
+          (await ynab.budgets.getBudgetSettingsById(budgetId)).data.settings.currency_format
+            ?.display_symbol ?? ''
 
-      await Promise.all(
-        tasks.map(({ content, description }) =>
-          todoist.addTask({
-            projectId: OWED_TODOIST_PROJECT_ID,
-            content,
-            description,
-          }),
-        ),
-      )
-    }),
-  )
+        console.info('Currency', currency)
+
+        const tasks = transactionsToProcess.map(({ amount, date, memo, payee_name }) => {
+          let task = `(${currency ? `${currency} ` : ''}${formatAmount(amount)}) `
+
+          if (memo) {
+            task += `${memo}, `
+          }
+          task += payee_name
+
+          return {
+            content: task,
+            description: Intl.DateTimeFormat('en-GB', { dateStyle: 'short' }).format(
+              new Date(date),
+            ),
+          }
+        })
+
+        console.info('Tasks', tasks)
+
+        await Promise.all(
+          tasks.map(({ content, description }) =>
+            todoist.addTask({
+              projectId: OWED_TODOIST_PROJECT_ID,
+              content,
+              description,
+            }),
+          ),
+        )
+      }),
+    )
+  } catch (e) {
+    console.error('Error processing new transactions')
+    return new Response('Error processing new transactions', { status: 500 })
+  }
 
   return new Response('New transactions added to Todoist')
 }
