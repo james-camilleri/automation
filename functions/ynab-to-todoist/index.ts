@@ -57,7 +57,8 @@ export default async (request: Request) => {
     await Promise.all(
       Object.entries(payload).map(async ([budgetId, transactions]) => {
         const transactionsToProcess = transactions.filter(
-          ({ category_name }) => category_name === OWED_YNAB_CATEGORY_NAME,
+          ({ approved, cleared, category_name }) =>
+            approved && cleared === 'cleared' && category_name === OWED_YNAB_CATEGORY_NAME,
         )
         console.info('Transactions to process', transactionsToProcess)
 
