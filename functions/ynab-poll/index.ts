@@ -33,11 +33,14 @@ export default async () => {
         console.info('Key:', key)
         console.info('Last knowledge of server:', lastKnowledgeOfServer)
 
+        const sinceDate = new Date()
+        sinceDate.setDate(sinceDate.getDate() - 1)
+
         const {
           data: { transactions, server_knowledge },
         } = await ynab.transactions.getTransactions(
           budgetId,
-          undefined,
+          sinceDate.toISOString(),
           undefined,
           lastKnowledgeOfServer,
         )
