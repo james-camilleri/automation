@@ -34,7 +34,7 @@ export default async () => {
         console.info('Last knowledge of server:', lastKnowledgeOfServer)
 
         const sinceDate = new Date()
-        sinceDate.setDate(sinceDate.getDate() - 1)
+        sinceDate.setDate(sinceDate.getDate() - 15)
 
         const {
           data: { transactions, server_knowledge },
