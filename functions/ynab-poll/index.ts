@@ -27,7 +27,7 @@ export default async () => {
     const newBudgetData = await Promise.all(
       YNAB_BUDGETS.map(async (budgetId) => {
         const key = `${STORE_KEY_PREFIX}${budgetId}`
-        const lastKnowledgeOfServer = Number.parseInt(await store.get(key))
+        const lastKnowledgeOfServer = Number.parseInt(await store.get(key)) || undefined
 
         console.info('Budget:', budgetId)
         console.info('Key:', key)
