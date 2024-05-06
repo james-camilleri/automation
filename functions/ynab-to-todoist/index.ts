@@ -84,22 +84,28 @@ export default async (request: Request) => {
           const transactionDate = Intl.DateTimeFormat('en-GB', { dateStyle: 'short' }).format(
             new Date(date),
           )
+
+          const dueDate = new Date(transactionDate)
+          dueDate.setDate(dueDate.getDate() + 2)
+
           const description = `since ${transactionDate}`
 
           return {
             content: task,
             description,
+            dueDate: dueDate.toISOString().split('T')[0],
           }
         })
 
         console.info('Tasks', tasks)
 
         await Promise.all(
-          tasks.map(({ content, description }) =>
+          tasks.map(({ content, description, dueDate }) =>
             todoist.addTask({
               projectId: OWED_TODOIST_PROJECT_ID,
               content,
               description,
+              dueDate,
             }),
           ),
         )
