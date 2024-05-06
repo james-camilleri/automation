@@ -69,7 +69,7 @@ export default async (request: Request) => {
 
         const currency =
           (await ynab.budgets.getBudgetSettingsById(budgetId)).data.settings.currency_format
-            ?.display_symbol ?? ''
+            ?.currency_symbol ?? ''
 
         console.info('Currency', currency)
 
@@ -81,11 +81,14 @@ export default async (request: Request) => {
           }
           task += payee_name
 
+          const transactionDate = Intl.DateTimeFormat('en-GB', { dateStyle: 'short' }).format(
+            new Date(date),
+          )
+          const description = `since ${transactionDate}`
+
           return {
             content: task,
-            description: Intl.DateTimeFormat('en-GB', { dateStyle: 'short' }).format(
-              new Date(date),
-            ),
+            description,
           }
         })
 
