@@ -45,7 +45,7 @@ export default async (request: Request) => {
   const ynab = new api(YNAB_ACCESS_TOKEN)
   const todoist = new TodoistApi(TODOIST_API_KEY)
 
-  const payload = (JSON.parse((await request.json()) ?? '') ?? {}) as YnabWebhookPayload
+  const payload = (await request.json()) as YnabWebhookPayload
   console.info('Received payload', payload)
 
   if (!validatePayload(payload)) {
