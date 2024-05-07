@@ -60,9 +60,10 @@ export default async (request: Request) => {
       Object.entries(payload).map(async ([budgetId, transactions]) => {
         const transactionsToProcess = transactions
           .filter(
-            ({ approved, cleared, category_name, subtransactions }) =>
+            ({ amount, approved, cleared, category_name, subtransactions }) =>
               approved &&
               cleared === 'cleared' &&
+              amount < 0 &&
               (category_name === OWED_YNAB_CATEGORY_NAME || subtransactions.length > 0),
           )
           // Flatten out sub-transactions.
