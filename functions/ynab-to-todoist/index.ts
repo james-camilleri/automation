@@ -56,10 +56,18 @@ export default async (request: Request) => {
   try {
     await Promise.all(
       Object.entries(payload).map(async ([budgetId, transactions]) => {
-        const transactionsToProcess = transactions.filter(
-          ({ approved, cleared, category_name }) =>
-            approved && cleared === 'cleared' && category_name === OWED_YNAB_CATEGORY_NAME,
-        )
+        const transactionsToProcess = transactions
+          .filter(
+            ({ approved, cleared, category_name, subtransactions }) =>
+              approved &&
+              cleared === 'cleared' &&
+              (category_name === OWED_YNAB_CATEGORY_NAME || subtransactions.length > 0),
+          )
+          // Flatten out sub-transactions.
+          .map((transaction) =>
+            transaction.subtransactions.length > 0 ? transaction.subtransactions : transaction,
+          )
+          .flat()
         console.info('Transactions to process', transactionsToProcess)
 
         if (transactionsToProcess.length === 0) {
