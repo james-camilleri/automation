@@ -1,6 +1,6 @@
 import { TodoistApi } from '@doist/todoist-api-typescript'
 import { Config } from '@netlify/functions'
-import { api } from 'ynab'
+import { TransactionDetail, api } from 'ynab'
 
 import { YnabWebhookPayload } from '../_shared/types'
 
@@ -59,18 +59,29 @@ export default async (request: Request) => {
     await Promise.all(
       Object.entries(payload).map(async ([budgetId, transactions]) => {
         const transactionsToProcess = transactions
+          // Flatten out sub-transactions.
+          .map((transaction) =>
+            transaction.subtransactions.length > 0
+              ? // Copy pertinent sub-transaction properties to maintain transaction format.
+                transaction.subtransactions.map(
+                  ({ amount, category_name, memo }) =>
+                    ({
+                      ...transaction,
+                      amount,
+                      category_name,
+                      memo,
+                    }) as TransactionDetail,
+                )
+              : transaction,
+          )
+          .flat()
           .filter(
-            ({ amount, approved, cleared, category_name, subtransactions }) =>
+            ({ amount, approved, cleared, category_name }) =>
               approved &&
               cleared === 'cleared' &&
               amount < 0 &&
-              (category_name === OWED_YNAB_CATEGORY_NAME || subtransactions.length > 0),
+              category_name === OWED_YNAB_CATEGORY_NAME,
           )
-          // Flatten out sub-transactions.
-          .map((transaction) =>
-            transaction.subtransactions.length > 0 ? transaction.subtransactions : transaction,
-          )
-          .flat()
         console.info('Transactions to process', transactionsToProcess)
 
         if (transactionsToProcess.length === 0) {
