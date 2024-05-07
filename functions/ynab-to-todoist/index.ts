@@ -13,7 +13,9 @@ const OWED_TODOIST_PROJECT_ID = '2230293849'
 function validatePayload(payload: unknown): payload is YnabWebhookPayload {
   return (
     typeof payload === 'object' &&
-    Object.values(payload as object).every((value) => Array.isArray(value) && 'amount' in value[0])
+    Object.values(payload as object).every(
+      (value) => Array.isArray(value) && value[0] && 'amount' in value[0],
+    )
   )
 }
 
