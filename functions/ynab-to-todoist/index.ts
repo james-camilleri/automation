@@ -96,7 +96,7 @@ export default async (request: Request) => {
         console.info('Currency', currency)
 
         const tasks = transactionsToProcess.map(({ amount, date, memo, payee_name }) => {
-          let task = `(${currency || ''}${formatAmount(amount)}) `
+          let task = `**(${currency || ''}${formatAmount(amount)})** `
 
           if (memo) {
             task += `${memo}, `
