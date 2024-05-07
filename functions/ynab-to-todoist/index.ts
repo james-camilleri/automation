@@ -20,9 +20,9 @@ function validatePayload(payload: unknown): payload is YnabWebhookPayload {
 }
 
 function formatAmount(amount: number) {
-  const amountString = amount.toString()
-  const major = amountString.slice(0, -2)
-  const minor = amountString.slice(-2)
+  const amountString = Math.abs(amount).toString()
+  const major = amountString.slice(0, -3)
+  const minor = amountString.slice(-3, -1)
 
   let formatted = major
 
@@ -96,7 +96,7 @@ export default async (request: Request) => {
         console.info('Currency', currency)
 
         const tasks = transactionsToProcess.map(({ amount, date, memo, payee_name }) => {
-          let task = `(${currency ? `${currency} ` : ''}${formatAmount(amount)}) `
+          let task = `(${currency || ''}${formatAmount(amount)}) `
 
           if (memo) {
             task += `${memo}, `
