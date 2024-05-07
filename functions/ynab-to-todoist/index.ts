@@ -123,7 +123,7 @@ export default async (request: Request) => {
       }),
     )
   } catch (e) {
-    console.error('Error processing new transactions')
+    console.error('Error processing new transactions', e)
     return new Response('Error processing new transactions', { status: 500 })
   }
 
