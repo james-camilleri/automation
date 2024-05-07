@@ -14,7 +14,7 @@ function validatePayload(payload: unknown): payload is YnabWebhookPayload {
   return (
     typeof payload === 'object' &&
     Object.values(payload as object).every(
-      (value) => Array.isArray(value) && value[0] && 'amount' in value[0],
+      (value) => Array.isArray(value) && (value.length === 0 || 'amount' in value[0]),
     )
   )
 }
