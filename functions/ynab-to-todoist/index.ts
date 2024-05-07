@@ -107,7 +107,7 @@ export default async (request: Request) => {
             new Date(date),
           )
 
-          const dueDate = new Date(transactionDate)
+          const dueDate = new Date(date)
           dueDate.setDate(dueDate.getDate() + 2)
 
           const description = `since ${transactionDate}`
