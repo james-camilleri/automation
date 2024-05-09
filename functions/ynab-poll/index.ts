@@ -21,17 +21,12 @@ export default async () => {
 
   const ynab = new api(YNAB_ACCESS_TOKEN)
   const store = getStore(STORE_ID)
-  console.info('Budgets:', YNAB_BUDGETS)
 
   try {
     const newBudgetData = await Promise.all(
       YNAB_BUDGETS.map(async (budgetId) => {
         const key = `${STORE_KEY_PREFIX}${budgetId}`
         const lastKnowledgeOfServer = Number.parseInt(await store.get(key)) || undefined
-
-        console.info('Budget:', budgetId)
-        console.info('Key:', key)
-        console.info('Last knowledge of server:', lastKnowledgeOfServer)
 
         const sinceDate = new Date()
         sinceDate.setDate(sinceDate.getDate() - 15)
@@ -45,9 +40,6 @@ export default async () => {
           lastKnowledgeOfServer,
         )
 
-        console.info('Transactions:', transactions)
-        console.info('New server knowledge:', server_knowledge)
-
         return { budgetId, lastKnowledgeOfServer: server_knowledge.toString(), transactions }
       }),
     )
@@ -59,8 +51,6 @@ export default async () => {
       }),
       {} as YnabWebhookPayload,
     )
-
-    console.info('Webhook payload:', webhookPayload)
 
     const response = await fetch(WEBHOOK_ENDPOINT, {
       method: 'POST',

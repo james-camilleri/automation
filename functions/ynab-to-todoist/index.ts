@@ -52,7 +52,6 @@ export default async (request: Request) => {
   const todoist = new TodoistApi(TODOIST_API_KEY)
 
   const payload = (await request.json()) as YnabWebhookPayload
-  console.info('Received payload', payload)
 
   if (!validatePayload(payload)) {
     console.error('Invalid payload', payload)
@@ -87,18 +86,14 @@ export default async (request: Request) => {
               amount < 0 &&
               category_name === OWED_YNAB_CATEGORY_NAME,
           )
-        console.info('Transactions to process', transactionsToProcess)
 
         if (transactionsToProcess.length === 0) {
-          console.info('No transactions to process', transactionsToProcess)
           return
         }
 
         const currency =
           (await ynab.budgets.getBudgetSettingsById(budgetId)).data.settings.currency_format
             ?.currency_symbol ?? ''
-
-        console.info('Currency', currency)
 
         const tasks = transactionsToProcess.map(
           ({ amount, date, memo, parent_memo, payee_name }) => {
@@ -125,8 +120,6 @@ export default async (request: Request) => {
             }
           },
         )
-
-        console.info('Tasks', tasks)
 
         await Promise.all(
           tasks.map(({ content, description, dueDate }) =>
