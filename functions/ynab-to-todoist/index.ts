@@ -4,6 +4,10 @@ import { TransactionDetail, api } from 'ynab'
 
 import { YnabWebhookPayload } from '../_shared/types'
 
+interface ExtendedTransactionDetail extends TransactionDetail {
+  parent_memo?: string
+}
+
 const TODOIST_API_KEY = process.env.TODOIST_API_KEY
 const YNAB_ACCESS_TOKEN = process.env.YNAB_ACCESS_TOKEN
 
@@ -70,9 +74,10 @@ export default async (request: Request) => {
                       amount,
                       category_name,
                       memo,
-                    }) as TransactionDetail,
+                      parent_memo: transaction.memo,
+                    }) as ExtendedTransactionDetail,
                 )
-              : transaction,
+              : (transaction as ExtendedTransactionDetail),
           )
           .flat()
           .filter(
@@ -95,29 +100,31 @@ export default async (request: Request) => {
 
         console.info('Currency', currency)
 
-        const tasks = transactionsToProcess.map(({ amount, date, memo, payee_name }) => {
-          let task = `**(${currency || ''}${formatAmount(amount)})** `
+        const tasks = transactionsToProcess.map(
+          ({ amount, date, memo, parent_memo, payee_name }) => {
+            let task = `**(${currency || ''}${formatAmount(amount)})** `
 
-          if (memo) {
-            task += `${memo}, `
-          }
-          task += payee_name
+            if (memo) {
+              task += `${memo}, `
+            }
+            task += parent_memo ? `${parent_memo} (${payee_name})` : payee_name
 
-          const transactionDate = Intl.DateTimeFormat('en-GB', { dateStyle: 'short' }).format(
-            new Date(date),
-          )
+            const transactionDate = Intl.DateTimeFormat('en-GB', { dateStyle: 'short' }).format(
+              new Date(date),
+            )
 
-          const dueDate = new Date(date)
-          dueDate.setDate(dueDate.getDate() + 2)
+            const dueDate = new Date(date)
+            dueDate.setDate(dueDate.getDate() + 2)
 
-          const description = `since ${transactionDate}`
+            const description = `since ${transactionDate}`
 
-          return {
-            content: task,
-            description,
-            dueDate: dueDate.toISOString().split('T')[0],
-          }
-        })
+            return {
+              content: task,
+              description,
+              dueDate: dueDate.toISOString().split('T')[0],
+            }
+          },
+        )
 
         console.info('Tasks', tasks)
 
