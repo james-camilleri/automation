@@ -83,7 +83,7 @@ export default async (request: Request) => {
           .filter(
             ({ amount, approved, cleared, category_name }) =>
               approved &&
-              cleared === 'cleared' &&
+              ['cleared', 'reconciled'].includes(cleared) &&
               amount < 0 &&
               category_name === OWED_YNAB_CATEGORY_NAME,
           )
