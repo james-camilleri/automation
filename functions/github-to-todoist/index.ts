@@ -41,9 +41,9 @@ function urlToMarkdown(url: string) {
 
 async function getTaskForIssue(issue: Issue, projectId: string, todoist: TodoistApi) {
   const tasks = await todoist.getTasks({ projectId })
-  return tasks.filter(
+  return tasks.results.find(
     (task) => task.content === issue.title && task.description === urlToMarkdown(issue.html_url),
-  )[0]
+  )
 }
 
 async function syncGitHubIssue(
