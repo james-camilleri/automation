@@ -26,6 +26,6 @@
   "dependencies": {
     "@doist/todoist-api-typescript": "^7.1.1",
     "@netlify/blobs": "^7.3.0",
-    "ynab": "^2.2.0"
+    "ynab": "^4.5.0"
   }
 }
