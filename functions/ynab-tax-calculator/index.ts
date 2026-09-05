@@ -11,7 +11,7 @@ function getBudgetCurrency(api: api, budgetId: string) {
     .then((response) => response.data.settings.currency_format.iso_code)
 }
 
-export default async () => {
+const ynabTaxCalculator = async () => {
   if (!YNAB_ACCESS_TOKEN) {
     console.error('YNAB access token missing')
     return
@@ -23,13 +23,15 @@ export default async () => {
     const today = new Date()
     // Tax year starts on the 6th April.
     const taxYearStart =
-      today.getMonth() >= 3 && today.getDate() >= 6
+      today.getMonth() > 3 || (today.getMonth() === 3 && today.getDate() >= 6)
         ? new Date(today.getFullYear(), 3, 6)
         : new Date(today.getFullYear() - 1, 3, 6)
 
     const taxYearEnd = new Date(taxYearStart)
     taxYearEnd.setDate(taxYearEnd.getDate() - 1)
     taxYearEnd.setFullYear(taxYearEnd.getFullYear() + 1)
+
+    console.log(`💸 Calculating tax for the period ${taxYearStart.toISOString()} to ${taxYearEnd.toISOString()}`)
 
     const budgetData = await Promise.all(
       YNAB_BUDGETS.map(async (budgetId) => {
@@ -81,11 +83,14 @@ export default async () => {
     const totalIncome = transactions.reduce((sum, t) => sum + t.amount, 0)
     const tax = totalIncome * 0.45
 
+    console.log(`💸 Total taxable income: £${(totalIncome / 1000).toFixed(2)} (${transactions.length} transactions)`)
+    console.log(`💸 Total tax owed:       £${(tax / 1000).toFixed(2)}`)
+
     // console.log(
     //   transactions
     //     .map(
     //       (t) =>
-    //         `${t.payee_name}${t.memo ? ` (${t.memo})` : ''} £${t.amount_currency} x 0.45 = £${(
+    //         `${t.payee_name}${t.memo ? ` (${t.memo})` : ''} £${(t.amount / 1000).toFixed(2)} x 0.45 = £${(
     //           (t.amount * 0.45) /
     //           1000
     //         ).toFixed(2)}`,
@@ -113,6 +118,7 @@ export default async () => {
   }
 }
 
+export default ynabTaxCalculator
 export const config: Config = {
   // Midnight every day.
   schedule: '0 0 * * *',
