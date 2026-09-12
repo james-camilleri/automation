@@ -2,8 +2,8 @@ import type { Config } from '@netlify/functions'
 
 import { api } from 'ynab'
 
-const YNAB_ACCESS_TOKEN = process.env.YNAB_ACCESS_TOKEN
-const YNAB_BUDGETS = (process.env.YNAB_BUDGETS ?? '').split(',')
+const YNAB_ACCESS_TOKEN = 'DD-9YjuVUOHguYeMHenSFSSE-egZeawg0tFCcE8mFv8' //process.env.YNAB_ACCESS_TOKEN
+const YNAB_BUDGETS = 'cee3eb9e-d5a1-452f-9e18-0463d35bec2a,08fe998f-f717-420b-a8f5-51fb170423aa'.split(',')
 
 function getBudgetCurrency(api: api, budgetId: string) {
   return api.plans
@@ -111,6 +111,7 @@ const ynabTaxCalculator = async () => {
       category: {
         goal_target: tax,
         goal_target_date: taxYearEnd.toISOString().split('T')[0],
+        goal_needs_whole_amount: false
       },
     })
   } catch (e) {
